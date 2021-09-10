@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录页面</title>
+    <link rel="stylesheet" href="../css/login.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container-fluid text-center page">
+        <div class="row justify-content-center align-items-center">
+            <form action="/login.do" method="post">
+                <img src="https://v4.bootcss.com/docs/assets/brand/bootstrap-solid.svg" class="logo">
+                <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+                <input type="text" class="form-control" placeholder="Username" name="userName">
+                <input type="password" class="form-control" placeholder="Password" name="passWord">
+                <br>
+                <button class="btn btn-primary btn-block" (click)="login">Sign in</button>
+                <p class="mt-3 mb-3 text-muted">© 2020-2021</p>
+            </form>
+        </div>
+    </div>
+</body>
+
+<script src="../js/jquery-3.5.1.js"></script>
+<script>
+    function login() {
+        // usersname = document.getElementById("userName").value
+        // password = document.getElementById("passWord").value
+
+        let userName = $("#userName").val();
+        let passWord = $("#passWord").val();
+        // console.log(userName);
+        // console.log(passWord);
+        $.ajax({
+            type: "post",
+            url: "/login.do",
+            data: {
+                userName: userName,
+                passWord: passWord
+            },
+            success(data) {
+                console.log("login#1" + data);
+            }
+        })
+    }
+</script>
+
+</html>

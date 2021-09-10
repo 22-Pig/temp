@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>园区管理页面</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+</head>
+
+<body>
+    <!-- 导航栏 -->
+    <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+        <img src="https://v4.bootcss.com/docs/assets/brand/bootstrap-solid.svg" class="logo" width="36px">
+        <h5 class="my-0 mr-md-auto font-weight-normal">园区管理页面</h5>
+        <nav class="my-2 my-md-0 mr-md-3">
+            <a class="p-2 text-dark" href="../page/login.html">登录页面</a>
+            <a class="p-2 text-dark" href="../page/device.html">设备管理页面</a>
+            <a class="p-2 text-dark" href="../page/user.html">用户管理页面</a>
+        </nav>
+        <a class="btn btn-outline-primary" href="../page/park.html">刷新</a>
+    </div>
+    <!-- 大页面 -->
+    <main role="main" class="container">
+        <!-- 小页面#1 -->
+        <div class="my-3 p-3 bg-white rounded shadow-sm div">
+            <!-- 标题 -->
+            <h2 class="border-bottom border-gray pb-2 mb-0">第一个“模态框”</h2>
+            <!-- 主体 -->
+            <form class="needs-validation" action="" name="form_park" method="post">
+                <div class="form-row">
+                    <div class="col-md-3 mb-2">
+                        <label>园区ID:</label>
+                        <input type="text" name="loaclId" id="loaclId" class="form-control">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label>园区名:</label>
+                        <input type="text" name="thePark" id="thePark" class="form-control">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label>园区值:</label>
+                        <input type="text" name="localDesc" id="localDesc" class="form-control">
+                    </div>
+                </div>
+
+                <button class="btn btn-info btn-lg btn-block" onclick="toUpdatePark()">确定修改</button>
+            </form>
+        </div>
+        <!-- 小页面#2 -->
+        <div class="my-3 p-3 bg-white rounded shadow-sm div">
+            <!-- 主体 -->
+            <div class="text-center">
+                <h4>数据表映射<span class="badge badge-secondary">New</span></h4>
+            </div>
+            <!-- 数据表映射 -->
+            <div>
+                <div>
+                    <table id="parkTable" class="table table-striped" style="text-align: center;">
+                        <thead>
+                            <tr></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div>
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center" id="page_park">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <!-- 功能实现区域 -->
+            <div class="text-center">
+                <div class="col-auto my-1">
+                    <button class="btn btn-success btn-sm" onclick="toAddPark()">新增</button>
+                    <button class="btn btn-primary btn-sm" onclick="toQueryOnePark()">查询</button>
+                    <button class="btn btn-warning btn-sm" onclick="queryPark()">查询所有</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/jquery-3.5.1.js"></script>
+    <script src="../js/park.js"></script>
+    <script>
+        var maxPage;
+        var currentPage = 1;
+        window.onload = function () {
+            getPageTotal();
+            choosePage(currentPage);
+        }
+
+
+        // ============点击第几页就显示第几页的数据============start
+        function choosePage(num) {
+            currentPage = num;
+            console.log("choosePage#1" + num);
+            $.ajax({
+                type: "post",
+                url: "/getPageDataPark.do",
+                data: {
+                    pageNum: num,
+                    pageDataNum: 3
+                },
+                success(data) {
+                    console.log("choosePage#2" + data);
+                    showPark(data);
+                }
+            });
+        }
+        // ============上一页的方法
+        function prePage() {
+            if (currentPage > 1) {
+                choosePage(currentPage - 1);
+            }
+        }
+        // ============下一页的方法
+        function nextPage() {
+            if (currentPage < maxPage) {
+                choosePage(currentPage + 1);
+            }
+        }
+
+        function getPageTotal() {
+            // 请求数据库的数据一共有多少条(多少页)
+            $("#page_park").html("");
+            $.ajax({
+                type: "post",
+                url: "/getPagePark.do",
+                success(data) {
+                    console.log("getPageTotal#1" + data);
+                    maxPage = Math.ceil(data[0].pageNum / 3);
+                    $("#page_park").append(`<li class="page-item"><button type="button" onclick="prePage()" class="page-link">上一页</button></li>`);
+                    for (var i = 1; i <= maxPage; i++) {
+                        $('#page_park').append(`<li class="page-item"><button type="button" onclick="choosePage(${i})" class="btn page-link">${i}</button></li>`);
+                    };
+                    $("#page_park").append(`<li class="page-item"><button type="button" onclick="nextPage()" class="btn page-link">下一页</button></li>`);
+                }
+            });
+        }
+
+        function getData() {
+            // 拿到数据
+            $.ajax({
+                type: "get",
+                url: "/ajaxGetDataPark.do",
+                success(data) {
+                    // 响应成功所执行的函数 参数data是从后台返回的数据
+                    console.log("getData#1" + data);
+                    // 在拿到数据的回调函数里 调用渲染数据的方法
+                    showPark(data);
+                }
+            });
+        }
+
+        function showPark(data) {
+            data = JSON.parse(data);
+            console.log(typeof data);
+            $("#parkTable thead tr").html("");
+            $("#parkTable tbody").html("");
+            // ============渲染表头============
+            for (item in data[0]) {
+                // item属性名
+                $("#parkTable thead tr").append(`<th>${item}</th>`);
+            }
+            $("#parkTable thead tr").append(`<th>操作</th>`);
+            // ============渲染表数据============
+            $.each(data, (index, item) => {
+                if (item['园区信息'] == null) {
+                    item['园区信息'] = '未填写';
+                }
+                $("#parkTable tbody").append(`
+                <tr>
+                    <td>${item['园区ID']}</td>
+                    <td>${item['园区名']}</td>      
+                    <td>${item['园区信息']}</td>  
+                    <td>
+                        <button class="btn btn-danger" onclick="deletePark(${item['园区ID']})">删除</button>
+                        <button class="btn btn-info" onclick="byvalue(this)">修改</button>
+                    </td> 
+                </tr>
+            `)
+            });
+        }
+
+        // ============往第一个模态框里传值============start
+        function byvalue(obj) {
+            $('#parkTable tbody').on('click', 'tr', function () //鼠标点击监听
+            {
+                console.log("byvalue#1" + $(this).children());
+                var arr = $(this).children();
+                console.log("byvalue#2" + arr.eq(0).text());
+                $("#loaclId").val(arr.eq(0).text());
+                $("#thePark").val(arr.eq(1).text());
+                $("#localDesc").val(arr.eq(2).text());
+            });
+        }
+        // ============往第一个模态框里传值============end
+
+
+        // ============删除指定行的信息============start
+        function deletePark(loaclId) {
+            // 1、获取ajax对象
+            $.ajax({
+                type: "post",
+                url: "/delUserPost.do",
+                data: {
+                    loaclId: loaclId
+                },
+                success(data) {
+                    getPageTotal();
+                    choosePage(1);
+                }
+            });
+        }
+        // ============删除指定行的信息============end
+
+        // ============查询所有============start
+        function queryPark() {
+            $.ajax({
+                type: "post",
+                url: "/queryPark.do",
+                success(data) {
+                    console.log("queryUser#1" + data);
+                    getPageTotal();
+                    choosePage(1);
+                }
+            })
+        }
+        // ============查询所有============end
+
+        // ============查询单个============start
+        function toQueryOnePark() {
+            let loaclId = $("#loaclId").val();
+            let thePark = $("#thePark").val();
+            $.ajax({
+                type: "post",
+                url: "/queryOnePark.do",
+                data: {
+                    loaclId: loaclId,
+                    thePark: thePark
+                },
+                success(data) {
+                    console.log("toQueryOne#1" + data);
+                    showPark(data);
+                }
+            })
+        }
+
+
+    </script>
+</body>
+
+</html>
